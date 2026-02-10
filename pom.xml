@@ -18,6 +18,8 @@
         <allure.version>2.15.0</allure.version>
         <aspectj.version>1.9.7</aspectj.version>
         <surefire.version>3.0.0-M7</surefire.version>
+        <javafaker.version>1.0.2</javafaker.version>
+        <httpclient.version>4.5.13</httpclient.version>
     </properties>
 
     <dependencies>
@@ -68,7 +70,22 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- AspectJ для Allure отчетов -->
+        <!-- Apache HTTP Client для констант статусов -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+
+        <!-- зависимость JavaFaker -->
+         <dependency>
+         <groupId>com.github.javafaker</groupId>
+         <artifactId>javafaker</artifactId>
+         <version>1.0.2</version>
+         <scope>test</scope>
+     </dependency>
+
+         <!-- AspectJ для Allure отчетов -->
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>

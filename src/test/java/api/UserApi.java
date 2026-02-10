@@ -6,6 +6,7 @@ import io.restassured.specification.RequestSpecification;
 import models.User;
 
 import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.*;
 
 public class UserApi {
     private final RequestSpecification requestSpec;
@@ -35,7 +36,7 @@ public class UserApi {
     @Step("Проверка успешного создания пользователя")
     public boolean isCreatedSuccessfully(Response response) {
         try {
-            return response.statusCode() == 200 &&
+            return response.statusCode() == SC_OK &&
                     response.path("success") != null &&
                     Boolean.TRUE.equals(response.path("success"));
         } catch (Exception e) {
@@ -47,9 +48,9 @@ public class UserApi {
     public boolean isDuplicateError(Response response) {
         try {
             String message = response.path("message");
-            return response.statusCode() == 403 &&
+            return response.statusCode() == SC_FORBIDDEN &&
                     message != null &&
-                    message.contains("already exists");
+                    message.equals("User already exists");
         } catch (Exception e) {
             return false;
         }
@@ -59,9 +60,9 @@ public class UserApi {
     public boolean isMissingDataError(Response response) {
         try {
             String message = response.path("message");
-            return response.statusCode() == 403 &&
+            return response.statusCode() == SC_FORBIDDEN &&
                     message != null &&
-                    message.contains("required");
+                    message.equals("Email, password and name are required fields");
         } catch (Exception e) {
             return false;
         }

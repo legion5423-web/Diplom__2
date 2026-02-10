@@ -67,4 +67,13 @@ public class OrderApi {
             return false;
         }
     }
+
+    @Step("Получение списка заказов пользователя")
+    public Response getUserOrders(String accessToken) {
+        return given()
+                .spec(requestSpec)
+                .header("Authorization", accessToken)
+                .when()
+                .get("/api/orders");
+    }
 }

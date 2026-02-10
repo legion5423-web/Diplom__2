@@ -1,12 +1,13 @@
 package tests;
 
+import models.User;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import models.User;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.apache.http.HttpStatus.*;
+import static org.junit.Assert.*;
 
 public class UserTests extends BaseTest {
     private String accessToken;
@@ -18,7 +19,7 @@ public class UserTests extends BaseTest {
             try {
                 userApi.deleteUser(accessToken);
             } catch (Exception e) {
-                // Игнорируем ошибки удаления
+                System.err.println("Error deleting user: " + e.getMessage());
             }
         }
     }
@@ -37,11 +38,13 @@ public class UserTests extends BaseTest {
         System.out.println("Response body: " + response.asString());
         System.out.println("=================================");
 
+        assertEquals("Должен возвращаться статус 200", SC_OK, response.statusCode());
         assertTrue("Пользователь должен быть создан успешно",
                 userApi.isCreatedSuccessfully(response));
 
         // Сохраняем токен для очистки
         accessToken = userApi.getAccessToken(response);
+        assertNotNull("Должен возвращаться accessToken", accessToken);
     }
 
     @Test
@@ -57,10 +60,9 @@ public class UserTests extends BaseTest {
         System.out.println("Response body: " + response.asString());
         System.out.println("===================================");
 
-        if (response.statusCode() == 403) {
-            assertTrue("Должна быть ошибка дублирования",
-                    userApi.isDuplicateError(response));
-        }
+        assertEquals("Должен возвращаться статус 403", SC_FORBIDDEN, response.statusCode());
+        assertTrue("Должна быть ошибка дублирования",
+                userApi.isDuplicateError(response));
     }
 
     @Test
@@ -75,10 +77,9 @@ public class UserTests extends BaseTest {
         System.out.println("Response body: " + response.asString());
         System.out.println("========================================");
 
-        if (response.statusCode() == 403) {
-            assertTrue("Должна быть ошибка недостатка данных",
-                    userApi.isMissingDataError(response));
-        }
+        assertEquals("Должен возвращаться статус 403", SC_FORBIDDEN, response.statusCode());
+        assertTrue("Должна быть ошибка недостатка данных",
+                userApi.isMissingDataError(response));
     }
 
     @Test
@@ -94,10 +95,9 @@ public class UserTests extends BaseTest {
         System.out.println("Response body: " + response.asString());
         System.out.println("===========================================");
 
-        if (response.statusCode() == 403) {
-            assertTrue("Должна быть ошибка недостатка данных",
-                    userApi.isMissingDataError(response));
-        }
+        assertEquals("Должен возвращаться статус 403", SC_FORBIDDEN, response.statusCode());
+        assertTrue("Должна быть ошибка недостатка данных",
+                userApi.isMissingDataError(response));
     }
 
     @Test
@@ -113,9 +113,8 @@ public class UserTests extends BaseTest {
         System.out.println("Response body: " + response.asString());
         System.out.println("=======================================");
 
-        if (response.statusCode() == 403) {
-            assertTrue("Должна быть ошибка недостатка данных",
-                    userApi.isMissingDataError(response));
-        }
+        assertEquals("Должен возвращаться статус 403", SC_FORBIDDEN, response.statusCode());
+        assertTrue("Должна быть ошибка недостатка данных",
+                userApi.isMissingDataError(response));
     }
 }

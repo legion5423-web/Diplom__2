@@ -8,13 +8,18 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import models.User;
+import org.junit.After;
 import org.junit.Before;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.http.HttpStatus.SC_OK;
+import utils.DataGenerator;
+
 public class BaseTest {
-    protected static final String BASE_URL = "https://stellarburgers.nomoreparties.site";
+    protected static final String BASE_URL = "https://stellarburgers.education-services.ru/";
 
     protected UserApi userApi;
     protected AuthApi authApi;
@@ -34,43 +39,78 @@ public class BaseTest {
         orderApi = new OrderApi(requestSpec);
     }
 
+    @After
+    public void tearDown() {
+        // Базовая очистка (может быть переопределена в тестовых классах)
+    }
+
     protected List<String> getValidIngredients() {
         try {
             Response response = orderApi.getIngredients();
 
-            if (response.getContentType().contains("xml")) {
-                // Если ответ в XML формате
-                return getIngredientsFromXml(response);
-            } else {
-                // Если ответ в JSON формате
+            if (response.statusCode() != SC_OK) {
+                return getDefaultTestIngredients();
+            }
+
+            // Проверяем формат ответа
+            if (response.getContentType().contains("application/json")) {
                 return getIngredientsFromJson(response);
+            } else {
+                System.err.println("Unexpected content type: " + response.getContentType());
+                return getDefaultTestIngredients();
             }
         } catch (Exception e) {
-            // Возвращаем тестовые ингредиенты в случае ошибки
+            System.err.println("Error getting ingredients: " + e.getMessage());
             return getDefaultTestIngredients();
         }
     }
 
     private List<String> getIngredientsFromJson(Response response) {
-        // Парсим JSON ответ
-        return response.jsonPath().getList("data._id");
-    }
+        try {
+            List<Object> data = response.jsonPath().getList("data");
+            if (data == null || data.isEmpty()) {
+                return getDefaultTestIngredients();
+            }
 
-    private List<String> getIngredientsFromXml(Response response) {
-        // Парсим XML ответ (если API возвращает XML)
-        List<String> ingredients = new ArrayList<>();
-        // Здесь должна быть логика парсинга XML
-        // Для Stellar Burgers API обычно JSON, так что возвращаем тестовые данные
-        return getDefaultTestIngredients();
+            List<String> ingredients = new ArrayList<>();
+            for (Object item : data) {
+                if (item instanceof java.util.Map) {
+                    java.util.Map<String, Object> map = (java.util.Map<String, Object>) item;
+                    String id = (String) map.get("_id");
+                    if (id != null && !id.isEmpty()) {
+                        ingredients.add(id);
+                    }
+                }
+            }
+
+            return ingredients.isEmpty() ? getDefaultTestIngredients() : ingredients;
+        } catch (Exception e) {
+            return getDefaultTestIngredients();
+        }
     }
 
     private List<String> getDefaultTestIngredients() {
         // Тестовые ингредиенты из документации Stellar Burgers
         return List.of(
                 "61c0c5a71d1f82001bdaaa6d", // Флюоресцентная булка R2-D3
-                "61c0c5a71d1f82001bdaaa6f", // Соус Spicy-X
-                "61c0c5a71d1f82001bdaaa70", // Мясо бессмертных моллюсков Protostomia
-                "61c0c5a71d1f82001bdaaa72"  // Сыр с астероидной плесенью
+                "61c0c5a71d1f82001bdaaa6f"  // Соус Spicy-X
         );
+    }
+
+    // Вспомогательные методы для генерации тестовых данных
+    protected User generateRandomUser() {
+        return DataGenerator.generateRandomUser();
+    }
+
+    protected String generateRandomEmail() {
+        return DataGenerator.generateRandomEmail();
+    }
+
+    protected String generateRandomPassword() {
+        return DataGenerator.generateRandomPassword();
+    }
+
+    protected String generateRandomName() {
+        return DataGenerator.generateRandomName();
     }
 }

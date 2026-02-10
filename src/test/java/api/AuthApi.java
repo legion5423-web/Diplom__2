@@ -6,6 +6,7 @@ import io.restassured.specification.RequestSpecification;
 import models.User;
 
 import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.*;
 
 public class AuthApi {
     private final RequestSpecification requestSpec;
@@ -26,7 +27,7 @@ public class AuthApi {
     @Step("Проверка успешного логина")
     public boolean isLoginSuccessful(Response response) {
         try {
-            return response.statusCode() == 200 &&
+            return response.statusCode() == SC_OK &&
                     response.path("success") != null &&
                     Boolean.TRUE.equals(response.path("success"));
         } catch (Exception e) {
@@ -38,9 +39,9 @@ public class AuthApi {
     public boolean isInvalidCredentialsError(Response response) {
         try {
             String message = response.path("message");
-            return response.statusCode() == 401 &&
+            return response.statusCode() == SC_UNAUTHORIZED &&
                     message != null &&
-                    message.contains("incorrect");
+                    message.equals("email or password are incorrect");
         } catch (Exception e) {
             return false;
         }
