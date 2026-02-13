@@ -24,6 +24,15 @@ public class AuthApi {
                 .post("/api/auth/login");
     }
 
+    @Step("Получение данных пользователя")
+    public Response getUserData(String accessToken) {
+        return given()
+                .spec(requestSpec)
+                .header("Authorization", accessToken)
+                .when()
+                .get("/api/auth/user");
+    }
+
     @Step("Проверка успешного логина")
     public boolean isLoginSuccessful(Response response) {
         try {
